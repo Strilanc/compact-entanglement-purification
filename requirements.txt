@@ -1,0 +1,6 @@
+stim ~= 1.12.0
+sinter ~= 1.12.0
+sympy
+matplotlib
+numpy
+pytest

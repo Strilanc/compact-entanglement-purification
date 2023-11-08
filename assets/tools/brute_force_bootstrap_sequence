@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+import itertools
+import pathlib
+from typing import Literal
+
+from matplotlib import pyplot as plt
+
+import sys
+sys.path.append(str(pathlib.Path(__file__).parent.parent / 'src'))
+
+from epu.err_model import ErrModel
+from epu.rep_code_distillation import brute_force_rep_code_distill
+
+
+def plot_chain(ax: plt.Axes, x0: int, stages: list[ErrModel], color: str):
+    xs = []
+    ys = []
+
+    for xd, stage in enumerate(stages):
+        xs.append(x0 + xd)
+        ys.append(1 - stage.w)
+
+    ax.plot(xs, ys, color=color)
+
+
+def main():
+    fig, ax = plt.subplots(1, 1)
+    ax: plt.Axes
+    fig: plt.Figure
+    best = 0
+    for rep in range(1, 7):
+        for chain in itertools.product('XYZ', repeat=rep):
+            stages = [ErrModel(x=1 / 9, y=1 / 9, z=1 / 9)]
+            basis: Literal['X', 'Y', 'Z']
+            for basis in chain:
+                stages.append(brute_force_rep_code_distill(basis, stages[-1])[1])
+            plot_chain(ax, len(stages) - 2, stages[-2:], 'red' if chain[-1] == 'X' else 'green' if chain[-1] == 'Y' else 'blue')
+            if stages[-1].w > best:
+                best = stages[-1].w
+                print(best, ''.join(chain))
+
+    ax.set_ylim(1e-4, 1)
+    ax.semilogy()
+    ax.grid()
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

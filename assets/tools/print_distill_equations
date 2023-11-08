@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+import pathlib
+
+import sympy
+import sys
+sys.path.append(str(pathlib.Path(__file__).parent.parent / 'src'))
+
+from epu.rep_code_distillation import distill_x_raw, distill_x_detect_probability, distill_z_detect_probability, \
+    distill_y_detect_probability, distill_z_raw, distill_y_raw
+
+
+def main():
+    w1 = sympy.var('w1')
+    x1 = sympy.var('x1')
+    y1 = sympy.var('y1')
+    z1 = sympy.var('z1')
+    w2 = sympy.var('w2')
+    x2 = sympy.var('x2')
+    y2 = sympy.var('y2')
+    z2 = sympy.var('z2')
+    w = sympy.var('w')
+    x = sympy.var('x')
+    y = sympy.var('y')
+    z = sympy.var('z')
+    a = sympy.var('a')
+    alpha = sympy.var(r'\alpha')
+    beta = sympy.var(r'\beta')
+
+    print("X DETECT")
+    print(distill_x_detect_probability(w1, x1, y1, z1, w2, x2, y2, z2))
+    print()
+
+    print("Y DETECT")
+    print(distill_y_detect_probability(w1, x1, y1, z1, w2, x2, y2, z2))
+    print()
+
+    print("Z DETECT")
+    print(distill_z_detect_probability(w1, x1, y1, z1, w2, x2, y2, z2))
+    print()
+
+    print("X DISTILL")
+    for e in distill_x_raw(w1, x1, y1, z1, w2, x2, y2, z2):
+        print(e)
+    print()
+
+    print("Y DISTILL")
+    for e in distill_y_raw(w1, x1, y1, z1, w2, x2, y2, z2):
+        print(e)
+    print()
+
+    print("Z DISTILL")
+    for e in distill_z_raw(w1, x1, y1, z1, w2, x2, y2, z2):
+        print(e)
+    print()
+
+    print("BIAS BOOST")
+    for e in distill_y_raw(1, x, y, x, 1, a, a, a):
+        print(e)
+    print()
+
+    print("BIAS BUST")
+    w3, x3, y3, z3 = distill_x_raw(1, x, y, x, 1, alpha, beta, alpha)
+    for e in distill_z_raw(w3, x3, y3, z3, 1, alpha, beta, alpha):
+        print(e.expand())
+    print()
+
+
+if __name__ == '__main__':
+    main()

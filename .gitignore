@@ -1,0 +1,11 @@
+.idea
+out/
+__pycache__
+.pytest_cache
+.idea/*
+*.swp
+**/.vs/*
+**/obj/*
+**/bin/*
+**/.venv/*
+**/.cache/*

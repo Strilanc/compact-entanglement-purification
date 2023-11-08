@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+import math
+import pathlib
+from typing import cast, Any
+import sys
+sys.path.append(str(pathlib.Path(__file__).parent.parent / 'src'))
+
+from epu.err_model import ErrModel
+from epu.rep_code_distillation import brute_force_rep_code_distill
+
+
+def latex_float(x: float) -> str:
+    if not (x > 0):
+        return str(x)
+    k = 0
+    while x < 1:
+        k += 1
+        x *= 10
+    return f'{x:.1f}\cdot 10^{{-{k}}}'
+
+
+def odds_model_latex(discard: float, label: str, m: ErrModel) -> str:
+    x = m.x / m.w
+    y = m.y / m.w
+    z = m.z / m.w
+    if discard == 0:
+        a = fr'''\xrightarrow{{\text{{{label}}}}}'''
+    else:
+        a = fr'''\xrightarrow[\text{{discards}}\ {math.ceil(discard * 100)}\%]{{\text{{{label}}}}}'''
+    b = fr'''\begin{{bmatrix}}1\\{latex_float(x)}\\{latex_float(y)}\\{latex_float(z)}\end{{bmatrix}}'''
+    return a + '\n' + b
+
+
+def main():
+    discard0 = 0
+    stage0 = ErrModel.from_odds(6, 1, 1, 1)
+    assert abs(stage0.w - 2/3) < 1e-8
+    bases = 'XYXYZX'
+
+    discard1, stage1 = brute_force_rep_code_distill(cast(Any, bases[0]), stage0)
+    discard2, stage2 = brute_force_rep_code_distill(cast(Any, bases[1]), stage1)
+    discard3, stage3 = brute_force_rep_code_distill(cast(Any, bases[2]), stage2)
+    discard4, stage4 = brute_force_rep_code_distill(cast(Any, bases[3]), stage3)
+    discard5, stage5 = brute_force_rep_code_distill(cast(Any, bases[4]), stage4)
+    discard6, stage6 = brute_force_rep_code_distill(cast(Any, bases[5]), stage5)
+
+    stage7 = stage6
+    discard7 = 0
+    boosts7 = 24
+    for _ in range(boosts7):
+        discard7_boost, stage7 = brute_force_rep_code_distill('Y', stage7, stage6)
+        discard7 += discard7_boost
+
+    stage8 = stage7
+    discard8 = 0
+    boosts8 = 15
+    for _ in range(boosts8):
+        discard8_boost, stage8 = brute_force_rep_code_distill('X', stage8, stage7)
+        discard8 += discard8_boost
+        discard8_boost, stage8 = brute_force_rep_code_distill('Z', stage8, stage7)
+        discard8 += discard8_boost
+
+    print(odds_model_latex(discard0, 'in', stage0))
+    print('&', odds_model_latex(discard1, bases[0], stage1))
+    print(odds_model_latex(discard2, bases[1], stage2))
+    print(odds_model_latex(discard3, bases[2], stage3))
+    print(r'\\&', odds_model_latex(discard4, bases[3], stage4))
+    print(odds_model_latex(discard5, bases[4], stage5))
+    print(odds_model_latex(discard6, bases[5], stage6))
+    print(r'\\&', odds_model_latex(discard7, f'bias ({boosts7} Y boosts)', stage7))
+    print(odds_model_latex(discard8, f'bust ({boosts8} XZ boosts)', stage8))
+
+
+if __name__ == '__main__':
+    main()
