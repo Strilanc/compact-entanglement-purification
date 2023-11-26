@@ -144,3 +144,50 @@ def distill_y(a: ErrModel, b: ErrModel) -> ErrModel:
 def distill_z(a: ErrModel, b: ErrModel) -> ErrModel:
     w, x, y, z = distill_z_raw(a.w, a.x, a.y, a.z, b.w, b.x, b.y, b.z)
     return ErrModel.from_odds(w, x, y, z)
+
+
+def compare_x_circuit() -> stim.Circuit:
+    return stim.Circuit("""
+        SQRT_X 1
+        CX 1 0
+        H 1
+        M 1
+    """)
+
+
+def compare_y_circuit() -> stim.Circuit:
+    return stim.Circuit("""
+        CY 1 0
+        SQRT_X 1
+        M 1
+    """)
+
+
+def compare_z_circuit() -> stim.Circuit:
+    return stim.Circuit("""
+        CY 0 1
+        M 1
+    """)
+
+
+def distill_circuit(basis: str) -> stim.Circuit:
+    if basis == 'X':
+        c = compare_x_circuit()
+    elif basis == 'Y':
+        c = compare_y_circuit()
+    elif basis == 'Z':
+        c = compare_z_circuit()
+    else:
+        raise NotImplementedError(f'{basis=}')
+    d = stim.Circuit("""
+        R 0 1 2 3
+        H 0 1
+        CX 0 2 1 3
+    """)
+    for inst in c:
+        d.append(inst)
+        d.append(inst.name, [e.qubit_value + 2 for e in inst.targets_copy()])
+
+    if basis in 'XZ':
+        d.append(basis, [0])
+    return d

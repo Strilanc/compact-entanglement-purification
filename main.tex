@@ -104,7 +104,7 @@ literate={*}{{\char42}}1
 \newcommand{\definitionref}[1]{\hyperref[definition:#1]{Definition~\ref*{definition:#1}}}
 
 \begin{document}
-\title{Ridiculously Compact Entanglement Purification}
+\title{Tetrationally Compact Entanglement Purification}
 
 \date{\today}
 \author{Craig Gidney}
@@ -115,8 +115,7 @@ literate={*}{{\char42}}1
 This paper shows that entanglement can be purified using very little storage, assuming the only source of noise is in the quantum channel being used to share the entanglement.
 Entangled pairs with a target infidelity of $\epsilon$ can be created in $\Tilde{O}(\log \frac{1}{\epsilon})$ time using $O(\log^{\ast} \frac{1}{\epsilon})$ storage space, where $\log^{\ast}$ is the iterated logarithm.
 This is achieved by using multiple stages of error detection, with boosting within each stage.
-Concretely, the paper shows that 9 qubits of noiseless storage is enough to turn entanglement with an infidelity of $1/3$ into way-better-than-anything-you'll-ever-need entanglement with an infidelity of $10^{-78}$.
-Alternatively, for the truly discerning, 11 qubits is enough to reach an infidelity of $10^{-1000000000000000000000000000}$.
+For example, the paper shows that 11 qubits of noiseless storage is enough to turn entanglement with an infidelity of $1/3$ into entanglement with an infidelity of $10^{-1000000000000000000000000000}$.
 \end{abstract}
 
 \textbf{Data availability}: All code written for this paper is included in its attached ancillary files.
@@ -212,9 +211,10 @@ See \fig{distill_blocks} for circuits implementing these details correctly.
     }
     \caption{
         The operations executed when distilling with a rep code in each basis.
-        Each $\text{Compare}_P$ circuit transforms the input operator $+PP$ into the measured operator $+IZ$; this is the most important function of the circuit.
-        The other details of each $\text{Compare}_P$ circuit determine the exact way in which input sign errors propagate into output sign errors.
-        It's impossible to pick sign propagation rules that can't be made to work, so I'm not advocating for these $\text{Compare}_P$ circuits over others, but the analysis in the rest of the paper uses the sign propagation rules of these specific circuits.
+        Each $\text{Compare}_P$ circuit has a measurement flow $+PP \rightarrow (-1)^m$ as well as decoding flows $X_L \rightarrow XI$ and $Z_L \rightarrow ZI$.
+        The $P^{P\neq Y}$ gate removes minus signs coming from the fact that $|00\rangle + |11\rangle$ is stabilized by $-YY$ instead of $+YY$.
+        It applies $X$ when $P=X$, $I$ when $P=Y$, and $Z$ when $P=Z$.
+        Note that these circuits are somewhat non-standard, due to the underlying definitions of $X_L$ and $Z_L$ being somewhat non-standard, to control the exact way in which input sign errors propagate into output sign errors.
         The $\text{Distill}_P$ circuit has Alice and Bob each locally run $\text{Compare}_P$, and then use classical communication to compare the results.
         If the results agree, they keep the output qubits.
         Otherwise they discard the output qubits and try again with new inputs.
@@ -232,8 +232,8 @@ Stepping back, a rep code distillation takes two noisy EPR pairs as input.
 It has some chance of detecting an error and discarding.
 Otherwise it succeeds and produces one output.
 See \fig{distill_stabilizers} for diagrams showing how each rep code catches errors.
-To analyze rep code distillation, it's necessary to be able to compute the chance of discarding and the noise model describing the state output upon success.
 
+To analyze rep code distillation, it's necessary to be able to compute the chance of discarding and the noise model describing the state output upon success.
 I'll use $v \stackrel{B}{\star} w$ to represent the probability of a $B$-basis rep code distillation detecting an error.
 I used sympy to enumerate the cases detected by each rep code and symbolically accumulate the probability of a failure.
 The probabilities of a distillation failure for each basis are:
@@ -380,7 +380,7 @@ Therefore, given a target $\epsilon$, alternating between X rep code and Z rep c
 In the previous subsection, each stage distilled copies of the output from the previous stage.
 Distillation was always combining two of the best-so-far state.
 ``Boosting'' is an alternative technique, where a good state is improved by repeatedly merging mediocre states into it.
-(Note: boosting isn't my idea, but I wasn't able to locate where I read about it.)
+(Note: in the literature, ``boosting'' is more commonly called ``pumping''~\cite{dr2003purification}).
 In particular, staging as described in the previous subsection results in states being combined like this:
 
 \begin{equation}

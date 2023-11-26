@@ -1,8 +1,11 @@
-# Code for "Ridiculously Compact Entanglement Purification"
+# Code for "Tetrationally Compact Entanglement Purification"
 
-This repository contains the source code used for testing the claims in the paper
-"Ridiculously Compact Entanglement Purification".
+This repository contains the latex, and python code, for the paper
+"Tetrationally Compact Entanglement Purification".
 
-The `src/epu` directory contains python code for distilling with rep codes.
+Index:
 
-The `src/tools` directory contains scripts computing information used in the paper.
+- `anc/src/epu/`: directory containing python code for distilling with rep codes.
+- `anc/src/tools/`: directory contains scripts computing information used in the paper.
+- `assets/`: directory with images for figures in the paper
+- `main.tex`: latex of the paper
